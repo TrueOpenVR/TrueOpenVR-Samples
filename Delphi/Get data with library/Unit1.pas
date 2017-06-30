@@ -73,7 +73,7 @@ implementation
 
 procedure TMain.GetBtnClick(Sender: TObject);
 var
-  myVRInfo: TVRInfo; myHMD: THMD; myController, myController2: TControllers; keys: string; iResult: integer;
+  myVRInfo: TVRInfo; myHMD: THMD; myController, myController2: TController; keys: string; iResult: integer;
 begin
   //HMD
   iResult:=GetHMDData(myHMD);

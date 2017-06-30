@@ -85,8 +85,8 @@ end;
   TVRInfo = VRInfo;
 
   //Controllers
-  PControllers = ^TControllers;
-  _Controllers = record
+  PController = ^TController;
+  _Controller = record
     X: double;
     Y: double;
     Z: double;
@@ -98,8 +98,8 @@ end;
     ThumbX: smallint;
     ThumbY: smallint;
 end;
-  Controllers = _Controllers;
-  TControllers = Controllers;
+  Controller = _Controller;
+  TController = Controller;
 
 const
   IDHMD = 0;
@@ -115,13 +115,13 @@ implementation
 
 function GetInfo(out myVRInfo: TVRInfo): DWORD; stdcall; external 'TOVR.dll' name 'GetInfo';
 function GetHMDData(out myHMD: THMD): DWORD; stdcall; external 'TOVR.dll' name 'GetHMDData';
-function GetControllersData(out myController, myContoller2: TControllers): DWORD; stdcall; external 'TOVR.dll' name 'GetControllersData';
+function GetControllersData(out myController, myContoller2: TController): DWORD; stdcall; external 'TOVR.dll' name 'GetControllersData';
 function SetControllerData(dwIndex: integer; MotorSpeed: dword): DWORD; stdcall; external 'TOVR.dll' name 'SetControllerData';
 function SetCentering(dwIndex: integer): DWORD; stdcall; external 'TOVR.dll' name 'SetCentering';
 
 procedure TMain.GetBtnClick(Sender: TObject);
 var
-  myVRInfo: TVRInfo; myHMD: THMD; myController, myController2: TControllers; keys: string; iResult: integer;
+  myVRInfo: TVRInfo; myHMD: THMD; myController, myController2: TController; keys: string; iResult: integer;
 begin
   //HMD
   iResult:=GetHMDData(myHMD);
