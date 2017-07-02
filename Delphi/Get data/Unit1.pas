@@ -54,6 +54,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -98,15 +99,28 @@ const
 
 var
   Main: TMain;
+  DriverPath: string;
+  DllHandle: HMODULE;
+  GetHMDData: function(out myHMD: THMD): DWORD; stdcall;
+  GetControllersData: function(out myController, myController2: TController): DWORD; stdcall;
+  SetControllerData: function (dwIndex: integer; MotorSpeed: dword): DWORD; stdcall;
+  SetCentering: function (dwIndex: integer): DWORD; stdcall;
 
 implementation
 
 {$R *.dfm}
 
-function GetHMDData(out myHMD: THMD): DWORD; stdcall; external 'TOVR.dll' name 'GetHMDData';
-function GetControllersData(out myController, myContoller2: TController): DWORD; stdcall; external 'TOVR.dll' name 'GetControllersData';
-function SetControllerData(dwIndex: integer; MotorSpeed: dword): DWORD; stdcall; external 'TOVR.dll' name 'SetControllerData';
-function SetCentering(dwIndex: integer): DWORD; stdcall; external 'TOVR.dll' name 'SetCentering';
+procedure GetDriverPath;
+var
+  Reg: TRegistry;
+begin
+  Reg:=TRegistry.Create;
+  Reg.RootKey:=HKEY_CURRENT_USER;
+  if Reg.OpenKey('\Software\TrueOpenVR', false) = false then Exit;
+  if FileExists(Reg.ReadString('Driver')) = false then Exit;
+  DriverPath:=Reg.ReadString('Driver');
+  Reg.Free;
+end;
 
 procedure TMain.GetBtnClick(Sender: TObject);
 var
@@ -206,6 +220,15 @@ procedure TMain.FormCreate(Sender: TObject);
 begin
   Label32.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all devices';
   Application.Title:=Caption;
+
+  GetDriverPath;
+  if FileExists(DriverPath) then begin
+    DllHandle:=LoadLibrary(PChar(DriverPath));
+    @GetHMDData:=GetProcAddress(DllHandle, 'GetHMDData');
+    @GetControllersData:=GetProcAddress(DllHandle, 'GetControllersData');
+    @SetControllerData:=GetProcAddress(DllHandle, 'SetControllerData');
+    @SetCentering:=GetProcAddress(DllHandle, 'SetCentering');
+  end;
 end;
 
 procedure TMain.Button1Click(Sender: TObject);
@@ -219,6 +242,11 @@ procedure TMain.Button2Click(Sender: TObject);
 begin
   SetControllerData(IDController, 12599);
   SetControllerData(IDController2, 42517);
+end;
+
+procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  FreeLibrary(DllHandle);
 end;
 
 end.
