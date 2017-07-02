@@ -4,8 +4,8 @@ object Main: TMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = '[TrueOpenVR] Get data'
-  ClientHeight = 328
-  ClientWidth = 614
+  ClientHeight = 345
+  ClientWidth = 583
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,8 +18,8 @@ object Main: TMain
   PixelsPerInch = 96
   TextHeight = 13
   object Label32: TLabel
-    Left = 432
-    Top = 296
+    Left = 400
+    Top = 312
     Width = 30
     Height = 13
     Alignment = taCenter
@@ -27,7 +27,7 @@ object Main: TMain
   end
   object GetBtn: TButton
     Left = 8
-    Top = 296
+    Top = 312
     Width = 75
     Height = 25
     Caption = 'Get'
@@ -37,35 +37,42 @@ object Main: TMain
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 217
-    Height = 265
+    Width = 185
+    Height = 289
     Caption = 'HMD'
     TabOrder = 1
     object Label7: TLabel
-      Left = 16
+      Left = 8
       Top = 192
       Width = 80
       Height = 13
       Caption = 'Screen index = 0'
     end
     object Label8: TLabel
-      Left = 16
+      Left = 8
       Top = 216
       Width = 61
       Height = 13
       Caption = 'Scale = false'
     end
     object Label9: TLabel
-      Left = 16
+      Left = 8
       Top = 240
       Width = 105
       Height = 13
       Caption = 'User resolution = 0 x 0'
     end
+    object Label18: TLabel
+      Left = 8
+      Top = 264
+      Width = 118
+      Height = 13
+      Caption = 'Render resolution = 0 x 0'
+    end
     object GroupBox4: TGroupBox
       Left = 8
       Top = 16
-      Width = 185
+      Width = 169
       Height = 81
       Caption = 'Position'
       TabOrder = 0
@@ -94,7 +101,7 @@ object Main: TMain
     object GroupBox5: TGroupBox
       Left = 8
       Top = 104
-      Width = 185
+      Width = 169
       Height = 81
       Caption = 'Rotation'
       TabOrder = 1
@@ -122,10 +129,10 @@ object Main: TMain
     end
   end
   object GroupBox2: TGroupBox
-    Left = 232
+    Left = 200
     Top = 8
     Width = 185
-    Height = 265
+    Height = 289
     Caption = 'Controller 1'
     TabOrder = 2
     object Label10: TLabel
@@ -201,7 +208,7 @@ object Main: TMain
   end
   object CloseBtn: TButton
     Left = 248
-    Top = 296
+    Top = 312
     Width = 75
     Height = 25
     Caption = 'Close'
@@ -209,10 +216,10 @@ object Main: TMain
     OnClick = CloseBtnClick
   end
   object GroupBox3: TGroupBox
-    Left = 424
+    Left = 392
     Top = 7
     Width = 185
-    Height = 266
+    Height = 290
     Caption = 'Controller 2'
     TabOrder = 4
     object Label21: TLabel
@@ -288,7 +295,7 @@ object Main: TMain
   end
   object Button1: TButton
     Left = 88
-    Top = 296
+    Top = 312
     Width = 75
     Height = 25
     Caption = 'Centring'
@@ -297,7 +304,7 @@ object Main: TMain
   end
   object Button2: TButton
     Left = 168
-    Top = 296
+    Top = 312
     Width = 75
     Height = 25
     Caption = 'Feedback'

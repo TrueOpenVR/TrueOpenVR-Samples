@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, XPMan;
+  Dialogs, StdCtrls, XPMan, Registry;
 
 type
   TMain = class(TForm)
@@ -48,6 +48,7 @@ type
     Button1: TButton;
     Button2: TButton;
     Label32: TLabel;
+    Label18: TLabel;
     procedure GetBtnClick(Sender: TObject);
     procedure CloseBtnClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -72,17 +73,6 @@ type
 end;
   HMD = _HMDData;
   THMD = HMD;
-
-  //VR Init
-  PVRInfo = ^TVRInfo;
-  _VRInfo = record
-    ScreenIndex: integer;
-    Scale: boolean;
-    UserWidth: integer;
-    UserHeight: integer;
-  end;
-  VRInfo = _VRInfo;
-  TVRInfo = VRInfo;
 
   //Controllers
   PController = ^TController;
@@ -113,7 +103,6 @@ implementation
 
 {$R *.dfm}
 
-function GetInfo(out myVRInfo: TVRInfo): DWORD; stdcall; external 'TOVR.dll' name 'GetInfo';
 function GetHMDData(out myHMD: THMD): DWORD; stdcall; external 'TOVR.dll' name 'GetHMDData';
 function GetControllersData(out myController, myContoller2: TController): DWORD; stdcall; external 'TOVR.dll' name 'GetControllersData';
 function SetControllerData(dwIndex: integer; MotorSpeed: dword): DWORD; stdcall; external 'TOVR.dll' name 'SetControllerData';
@@ -121,7 +110,10 @@ function SetCentering(dwIndex: integer): DWORD; stdcall; external 'TOVR.dll' nam
 
 procedure TMain.GetBtnClick(Sender: TObject);
 var
-  myVRInfo: TVRInfo; myHMD: THMD; myController, myController2: TController; keys: string; iResult: integer;
+  myHMD: THMD; myController, myController2: TController;
+  keys: string;
+  iResult: integer;
+  Reg: TRegistry;
 begin
   //HMD
   iResult:=GetHMDData(myHMD);
@@ -134,14 +126,26 @@ begin
   Label6.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
 
   //VR Init info
-  iResult:=GetInfo(myVRInfo);
-    if iResult = 0 then ShowMessage('Info not found');
-  Label7.Caption:='Screen index = ' + IntToStr(myVRInfo.ScreenIndex);
-  if myVRInfo.Scale = false then
+  Reg:=TRegistry.Create;
+  Reg.RootKey:=HKEY_CURRENT_USER;
+  if Reg.OpenKey('\Software\TrueOpenVR', true) then begin
+  try
+  if Reg.ReadBool('Scale') = false then
     Label8.Caption:='Scale = false'
   else
-   Label8.Caption:='Scale = true';
-  Label9.Caption:='User resolution = ' + IntToStr(myVrInfo.UserWidth) + ' x ' + IntToStr(myVrInfo.UserHeight);
+    Label8.Caption:='Scale = true';
+    Label7.Caption:='Screen index = ' + IntToStr(Reg.ReadInteger('ScreenIndex'));
+    Label9.Caption:='User resolution = ' + IntToStr(Reg.ReadInteger('UserWidth')) + ' x ' + IntToStr(Reg.ReadInteger('UserHeight'));
+    Label18.Caption:='Render resolution = ' + IntToStr(Reg.ReadInteger('RenderWidth')) + ' x ' + IntToStr(Reg.ReadInteger('RenderHeight'));
+  except
+    Label7.Caption:='Screen index = 1';
+    Label8.Caption:='Scale = true';
+    Label9.Caption:='User resolution = 1280 x 720';
+    Label18.Caption:='Render resolution = 1280 x 720';
+  end;
+  Reg.CloseKey;
+  end;
+  Reg.Free;
 
   //Controllers
   iResult:=GetControllersData(myController, myController2);
