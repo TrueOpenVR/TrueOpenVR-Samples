@@ -62,7 +62,7 @@ begin
   Reg.CloseKey;
   end else begin
     ShowMessage('TrueOpenVR not found');
-    Exit;
+    Halt;
   end;
   Reg.Free;
 

@@ -228,6 +228,9 @@ begin
     @GetControllersData:=GetProcAddress(DllHandle, 'GetControllersData');
     @SetControllerData:=GetProcAddress(DllHandle, 'SetControllerData');
     @SetCentering:=GetProcAddress(DllHandle, 'SetCentering');
+  end else begin
+    ShowMessage('TrueOpenVR not found');
+    Halt;
   end;
 end;
 
