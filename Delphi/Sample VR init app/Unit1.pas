@@ -4,11 +4,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, Jpeg, StdCtrls;
+  Dialogs, ExtCtrls, Jpeg, StdCtrls, XPMan, Registry;
 
 type
   TMain = class(TForm)
     View: TImage;
+    XPManifest1: TXPManifest;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -25,18 +26,6 @@ type
     { Public declarations }
   end;
 
-type
-  //VR Init
-  PVRInfo = ^TVRInfo;
-  _VRInfo = record
-    ScreenIndex: integer;
-    Scale: boolean;
-    UserWidth: integer;
-    UserHeight: integer;
-  end;
-  VRInfo = _VRInfo;
-  TVRInfo = VRInfo;
-
 var
   Main: TMain;
 
@@ -46,52 +35,66 @@ uses Unit2;
 
 {$R *.dfm}
 
-function GetInfo(out myVRInfo: TVRInfo): DWORD; stdcall; external 'TOVR.dll' name 'GetInfo';
-
 procedure TMain.FormCreate(Sender: TObject);
 var
-  iResult: integer; myVRInfo: TVRInfo;
+  iResult: integer; Reg: TRegistry; ScreenIndex, UserWidth, UserHeight: integer; ScreenScale: boolean;
 begin
   Application.Title:=Caption;
 
   if FileExists(ExtractFilePath(ParamStr(0)) + 'VR-Quake-screenshot.jpg') then
     View.Picture.LoadFromFile(ExtractFilePath(ParamStr(0)) + 'VR-Quake-screenshot.jpg');
+
   //VR Init info
-  iResult:=GetInfo(myVRInfo);
-    if iResult = 0 then begin
-      ShowMessage('Info not found');
-      Exit;
-    end;
+  Reg:=TRegistry.Create;
+  Reg.RootKey:=HKEY_CURRENT_USER;
+  if Reg.OpenKey('\Software\TrueOpenVR', true) then begin
+  try
+    ScreenScale:=Reg.ReadBool('Scale');
+    ScreenIndex:=Reg.ReadInteger('ScreenIndex');
+    UserWidth:=Reg.ReadInteger('UserWidth');
+    UserHeight:=Reg.ReadInteger('UserHeight');
+  except
+    ScreenScale:=false;
+    ScreenIndex:=1;
+    UserWidth:=1280;
+    UserHeight:=720;
+  end;
+  Reg.CloseKey;
+  end else begin
+    ShowMessage('TrueOpenVR not found');
+    Exit;
+  end;
+  Reg.Free;
 
-  if myVRInfo.ScreenIndex <= Screen.MonitorCount then begin
+  if ScreenIndex <= Screen.MonitorCount then begin
 
-    Left:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Left;
-    Top:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Top;
+    Left:=Screen.Monitors[ScreenIndex - 1].Left;
+    Top:=Screen.Monitors[ScreenIndex - 1].Top;
 
-    if Screen.Monitors[myVRInfo.ScreenIndex - 1].Width > myVRInfo.UserWidth
+    if Screen.Monitors[ScreenIndex - 1].Width > UserWidth
       then begin
         //Image on center
-        Width:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Width;
-        View.Width:=myVRInfo.UserWidth;
+        Width:=Screen.Monitors[ScreenIndex - 1].Width;
+        View.Width:=UserWidth;
         View.Left:=Width div 2 - View.Width div 2;
       end else begin
-        Width:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Width;
+        Width:=Screen.Monitors[ScreenIndex - 1].Width;
         View.Width:=Width;
       end;
 
-    if Screen.Monitors[myVRInfo.ScreenIndex - 1].Height > myVRInfo.UserHeight
+    if Screen.Monitors[ScreenIndex - 1].Height > UserHeight
       then begin
         //Image on center
-        Height:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Height;
-        View.Height:=myVRInfo.UserHeight;
+        Height:=Screen.Monitors[ScreenIndex - 1].Height;
+        View.Height:=UserHeight;
         View.Top:=Height div 2 - View.Height div 2;
       end else begin
-        Height:=Screen.Monitors[myVRInfo.ScreenIndex - 1].Height;
+        Height:=Screen.Monitors[ScreenIndex - 1].Height;
         View.Height:=Height;
       end;
 
       //Scale
-      if myVRInfo.Scale then begin
+      if ScreenScale then begin
         View.Left:=0;
         View.Top:=0;
         View.Width:=Width;

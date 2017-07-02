@@ -29,4 +29,8 @@ object Main: TMain
     Stretch = True
     OnMouseMove = ViewMouseMove
   end
+  object XPManifest1: TXPManifest
+    Left = 8
+    Top = 8
+  end
 end
