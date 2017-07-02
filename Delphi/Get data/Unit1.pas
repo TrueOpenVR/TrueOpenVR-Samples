@@ -142,7 +142,7 @@ begin
   //VR Init info
   Reg:=TRegistry.Create;
   Reg.RootKey:=HKEY_CURRENT_USER;
-  if Reg.OpenKey('\Software\TrueOpenVR', true) then begin
+  if Reg.OpenKey('\Software\TrueOpenVR', false) then begin
   try
   if Reg.ReadBool('Scale') = false then
     Label8.Caption:='Scale = false'

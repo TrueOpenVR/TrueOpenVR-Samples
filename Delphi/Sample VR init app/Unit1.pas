@@ -47,7 +47,7 @@ begin
   //VR Init info
   Reg:=TRegistry.Create;
   Reg.RootKey:=HKEY_CURRENT_USER;
-  if Reg.OpenKey('\Software\TrueOpenVR', true) then begin
+  if Reg.OpenKey('\Software\TrueOpenVR', false) then begin
   try
     ScreenScale:=Reg.ReadBool('Scale');
     ScreenIndex:=Reg.ReadInteger('ScreenIndex');
