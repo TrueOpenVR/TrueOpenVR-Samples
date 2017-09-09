@@ -59,16 +59,25 @@ int main()
 		return 1;
 	}
 
-	DWORD iResult = GetHMDData(&myHMD);
-	Sleep(300);
-	GetHMDData(&myHMD);
+	DWORD iResult = 0;
 
-	printf("Result = %d\n", iResult);
-	printf("X = %f\nY = %f\nZ = %f\nYaw = %f\nPitch = %f\nRoll = %f\n\n", myHMD.X, myHMD.Y, myHMD.Z, myHMD.Yaw, myHMD.Pitch, myHMD.Roll);
+	Sleep(300);
+	
+	while (true) {
+		
+		iResult = GetHMDData(&myHMD);
+		GetHMDData(&myHMD);
+
+		printf("Result = %d\n", iResult);
+		printf("X = %f\nY = %f\nZ = %f\nYaw = %f\nPitch = %f\nRoll = %f\n\n", myHMD.X, myHMD.Y, myHMD.Z, myHMD.Yaw, myHMD.Pitch, myHMD.Roll);
+
+		system("cls");
+
+		if ((GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0 || (GetAsyncKeyState(VK_RETURN) & 0x8000) != 0) break;
+	}
 
 	FreeLibrary(hDll);
 	hDll = nullptr;
 
-	system("pause");
 	return 0;
 }
