@@ -54,7 +54,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
@@ -99,7 +98,7 @@ const
 
 var
   Main: TMain;
-  DriverPath: string;
+  LibPath: string;
   DllHandle: HMODULE;
   GetHMDData: function(out myHMD: THMD): DWORD; stdcall;
   GetControllersData: function(out myController, myController2: TController): DWORD; stdcall;
@@ -110,15 +109,16 @@ implementation
 
 {$R *.dfm}
 
-procedure GetDriverPath;
+procedure GetLibPath;
 var
   Reg: TRegistry;
 begin
+  LibPath:='';
   Reg:=TRegistry.Create;
   Reg.RootKey:=HKEY_CURRENT_USER;
   if Reg.OpenKey('\Software\TrueOpenVR', false) = false then Exit;
-  if FileExists(Reg.ReadString('Drivers') + Reg.ReadString('Driver')) = false then Exit;
-  DriverPath:=Reg.ReadString('Drivers') + Reg.ReadString('Driver');
+  LibPath:=Reg.ReadString('Library');
+  if FileExists(LibPath) = false then LibPath:='';
   Reg.CloseKey;
   Reg.Free;
 end;
@@ -214,6 +214,8 @@ end;
 
 procedure TMain.CloseBtnClick(Sender: TObject);
 begin
+  if DllHandle <> 0 then
+    FreeLibrary(DllHandle);
   Close;
 end;
 
@@ -222,9 +224,9 @@ begin
   Label32.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all devices';
   Application.Title:=Caption;
 
-  GetDriverPath;
-  if FileExists(DriverPath) then begin
-    DllHandle:=LoadLibrary(PChar(DriverPath));
+  GetLibPath;
+  if LibPath <> '' then begin
+    DllHandle:=LoadLibrary(PChar(LibPath));
     @GetHMDData:=GetProcAddress(DllHandle, 'GetHMDData');
     @GetControllersData:=GetProcAddress(DllHandle, 'GetControllersData');
     @SetControllerData:=GetProcAddress(DllHandle, 'SetControllerData');
@@ -240,17 +242,13 @@ var
   iResult: integer;
 begin
   iResult:=SetCentering(IDHMD);
+  if iResult = 1 then ShowMessage('Centering success');
 end;
 
 procedure TMain.Button2Click(Sender: TObject);
 begin
   SetControllerData(IDController, 12599);
   SetControllerData(IDController2, 42517);
-end;
-
-procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  FreeLibrary(DllHandle);
 end;
 
 end.
