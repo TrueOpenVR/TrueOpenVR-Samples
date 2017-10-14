@@ -83,18 +83,13 @@ end;
     Yaw: double;
     Pitch: double;
     Roll: double;
-    Buttons: dword;
+    Buttons: word;
     Trigger: byte;
     ThumbX: smallint;
     ThumbY: smallint;
 end;
   Controller = _Controller;
   TController = Controller;
-
-const
-  IDHMD = 0;
-  IDController = 1;
-  IDController2 = 2;
 
 var
   Main: TMain;
@@ -173,10 +168,10 @@ begin
   Label14.Caption:='Pitch = ' + FloatToStr(myController.Pitch);
   Label15.Caption:='Roll = ' + FloatToStr(myController.Roll);
 
-  if (myController.Buttons and 1) <> 0 then keys:=keys + '1 ';
-  if (myController.Buttons and 2) <> 0 then keys:=keys + '2 ';
-  if (myController.Buttons and 4) <> 0 then keys:=keys + '3 ';
-  if (myController.Buttons and 8) <> 0 then keys:=keys + '4 ';
+  if (myController.Buttons and 1) <> 0 then keys:=keys + 'GP ';
+  if (myController.Buttons and 2) <> 0 then keys:=keys + 'TS ';
+  if (myController.Buttons and 4) <> 0 then keys:=keys + 'MN ';
+  if (myController.Buttons and 8) <> 0 then keys:=keys + 'SM ';
 
   if keys <> '' then
     Label16.Caption:='Buttons = ' + keys;
@@ -197,10 +192,10 @@ begin
 
   keys:='';
 
-  if (myController2.Buttons and 1) <> 0 then keys:=keys + '1 ';
-  if (myController2.Buttons and 2) <> 0 then keys:=keys + '2 ';
-  if (myController2.Buttons and 4) <> 0 then keys:=keys + '3 ';
-  if (myController2.Buttons and 8) <> 0 then keys:=keys + '4 ';
+  if (myController2.Buttons and 1) <> 0 then keys:=keys + 'GP ';
+  if (myController2.Buttons and 2) <> 0 then keys:=keys + 'TS ';
+  if (myController2.Buttons and 4) <> 0 then keys:=keys + 'MN ';
+  if (myController2.Buttons and 8) <> 0 then keys:=keys + 'SM ';
 
   if keys <> '' then
     Label27.Caption:='Buttons = ' + keys;
@@ -241,14 +236,14 @@ procedure TMain.Button1Click(Sender: TObject);
 var
   iResult: integer;
 begin
-  iResult:=SetCentering(IDHMD);
+  iResult:=SetCentering(0);
   if iResult = 1 then ShowMessage('Centering success');
 end;
 
 procedure TMain.Button2Click(Sender: TObject);
 begin
-  SetControllerData(IDController, 65535);
-  SetControllerData(IDController2, 32761);
+  SetControllerData(1, 32761);
+  SetControllerData(2, 65535);
 end;
 
 end.
