@@ -66,7 +66,6 @@ int main()
 	while (true) {
 		
 		iResult = GetHMDData(&myHMD);
-		GetHMDData(&myHMD);
 
 		printf("Result = %d\n", iResult);
 		printf("X = %f\nY = %f\nZ = %f\nYaw = %f\nPitch = %f\nRoll = %f\n\n", myHMD.X, myHMD.Y, myHMD.Z, myHMD.Yaw, myHMD.Pitch, myHMD.Roll);
