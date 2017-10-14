@@ -102,7 +102,7 @@ var
   DllHandle: HMODULE;
   GetHMDData: function(out myHMD: THMD): DWORD; stdcall;
   GetControllersData: function(out myController, myController2: TController): DWORD; stdcall;
-  SetControllerData: function (dwIndex: integer; MotorSpeed: dword): DWORD; stdcall;
+  SetControllerData: function (dwIndex: integer; MotorSpeed: word): DWORD; stdcall;
   SetCentering: function (dwIndex: integer): DWORD; stdcall;
 
 implementation
@@ -247,8 +247,8 @@ end;
 
 procedure TMain.Button2Click(Sender: TObject);
 begin
-  SetControllerData(IDController, 12599);
-  SetControllerData(IDController2, 42517);
+  SetControllerData(IDController, 65535);
+  SetControllerData(IDController2, 32761);
 end;
 
 end.
