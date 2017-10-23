@@ -7,16 +7,16 @@ uses
   Dialogs, TrueOpenVR, StdCtrls, XPMan;
 
 type
-  TForm1 = class(TForm)
-    GroupBox1: TGroupBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
-    Label7: TLabel;
-    XPManifest1: TXPManifest;
+  TMain = class(TForm)
+    hmdGB: TGroupBox;
+    xlbl: TLabel;
+    yLbl: TLabel;
+    zLbl: TLabel;
+    yawLbl: TLabel;
+    pitchLbl: TLabel;
+    rollLbl: TLabel;
+    AboutLbl: TLabel;
+    XPManifest: TXPManifest;
     procedure FormCreate(Sender: TObject);
     procedure FormClick(Sender: TObject);
   private
@@ -26,33 +26,33 @@ type
   end;
 
 var
-  Form1: TForm1;
+  Main: TMain;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TMain.FormCreate(Sender: TObject);
 var
   myHMD: THMD;
 begin
   Application.Title:=Caption;
-  Label7.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all devices';
+  AboutLbl.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all vr devices';
   if TOVR_Init = false then begin
     ShowMessage('TrueOpenVR not found');
     Halt;
   end;
   if GetHMDData(myHMD) <> 0 then begin
-    Label1.Caption:='X = ' + FloatToStr(myHMD.X);
-    Label2.Caption:='Y = ' + FloatToStr(myHMD.Y);
-    Label3.Caption:='Z = ' + FloatToStr(myHMD.Z);
-    Label4.Caption:='Yaw = ' + FloatToStr(myHMD.Yaw);
-    Label5.Caption:='Pitch = ' + FloatToStr(myHMD.Pitch);
-    Label6.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
+    xLbl.Caption:='X = ' + FloatToStr(myHMD.X);
+    yLbl.Caption:='Y = ' + FloatToStr(myHMD.Y);
+    zLbl.Caption:='Z = ' + FloatToStr(myHMD.Z);
+    yawLbl.Caption:='Yaw = ' + FloatToStr(myHMD.Yaw);
+    pitchLbl.Caption:='Pitch = ' + FloatToStr(myHMD.Pitch);
+    rollLbl.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
   end;
 end;
 
-procedure TForm1.FormClick(Sender: TObject);
+procedure TMain.FormClick(Sender: TObject);
 begin
   TOVR_Free;
 end;

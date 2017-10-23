@@ -3,7 +3,7 @@ object Main: TMain
   Top = 124
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = '[TrueOpenVR] Get data'
+  Caption = 'TrueOpenVR Get Data'
   ClientHeight = 345
   ClientWidth = 583
   Color = clBtnFace
@@ -14,10 +14,11 @@ object Main: TMain
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label32: TLabel
+  object AboutLbl: TLabel
     Left = 400
     Top = 312
     Width = 30
@@ -34,63 +35,63 @@ object Main: TMain
     TabOrder = 0
     OnClick = GetBtnClick
   end
-  object GroupBox1: TGroupBox
+  object hmdGB: TGroupBox
     Left = 8
     Top = 8
     Width = 185
     Height = 289
     Caption = 'HMD'
-    TabOrder = 1
-    object Label7: TLabel
+    TabOrder = 4
+    object ScrIndLbl: TLabel
       Left = 8
       Top = 192
       Width = 80
       Height = 13
       Caption = 'Screen index = 0'
     end
-    object Label8: TLabel
+    object ScaleLbl: TLabel
       Left = 8
       Top = 216
       Width = 61
       Height = 13
       Caption = 'Scale = false'
     end
-    object Label9: TLabel
+    object UserResLbl: TLabel
       Left = 8
       Top = 240
       Width = 105
       Height = 13
       Caption = 'User resolution = 0 x 0'
     end
-    object Label18: TLabel
+    object RndResLbl: TLabel
       Left = 8
       Top = 264
       Width = 118
       Height = 13
       Caption = 'Render resolution = 0 x 0'
     end
-    object GroupBox4: TGroupBox
+    object hmdPositionGB: TGroupBox
       Left = 8
       Top = 16
       Width = 169
       Height = 81
       Caption = 'Position'
       TabOrder = 0
-      object Label1: TLabel
+      object hmdXLbl: TLabel
         Left = 8
         Top = 16
         Width = 25
         Height = 13
         Caption = 'X = 0'
       end
-      object Label2: TLabel
+      object hmdYLbl: TLabel
         Left = 8
         Top = 40
         Width = 25
         Height = 13
         Caption = 'Y = 0'
       end
-      object Label3: TLabel
+      object hmdZlbl: TLabel
         Left = 8
         Top = 64
         Width = 25
@@ -98,28 +99,28 @@ object Main: TMain
         Caption = 'Z = 0'
       end
     end
-    object GroupBox5: TGroupBox
+    object hmdRotationGB: TGroupBox
       Left = 8
       Top = 104
       Width = 169
       Height = 81
       Caption = 'Rotation'
       TabOrder = 1
-      object Label4: TLabel
+      object hmdYawLbl: TLabel
         Left = 8
         Top = 16
         Width = 39
         Height = 13
         Caption = 'Yaw = 0'
       end
-      object Label5: TLabel
+      object hmdPitchLbl: TLabel
         Left = 8
         Top = 40
         Width = 42
         Height = 13
         Caption = 'Pitch = 0'
       end
-      object Label6: TLabel
+      object hmdRollLbl: TLabel
         Left = 8
         Top = 64
         Width = 36
@@ -128,77 +129,77 @@ object Main: TMain
       end
     end
   end
-  object GroupBox2: TGroupBox
+  object CtrlGB: TGroupBox
     Left = 200
     Top = 8
     Width = 185
     Height = 289
     Caption = 'Controller 1'
-    TabOrder = 2
-    object Label10: TLabel
+    TabOrder = 5
+    object CtrlXLbl: TLabel
       Left = 8
       Top = 24
       Width = 25
       Height = 13
       Caption = 'X = 0'
     end
-    object Label11: TLabel
+    object CtrlYLbl: TLabel
       Left = 8
       Top = 48
       Width = 25
       Height = 13
       Caption = 'Y = 0'
     end
-    object Label12: TLabel
+    object CtrlZLbl: TLabel
       Left = 8
       Top = 72
       Width = 25
       Height = 13
       Caption = 'Z = 0'
     end
-    object Label13: TLabel
+    object CtrlYawLbl: TLabel
       Left = 8
       Top = 96
       Width = 39
       Height = 13
       Caption = 'Yaw = 0'
     end
-    object Label14: TLabel
+    object CtrlPitchLbl: TLabel
       Left = 8
       Top = 120
       Width = 42
       Height = 13
       Caption = 'Pitch = 0'
     end
-    object Label15: TLabel
+    object CtrlRollLbl: TLabel
       Left = 8
       Top = 144
       Width = 36
       Height = 13
       Caption = 'Roll = 0'
     end
-    object Label16: TLabel
+    object CtrlBtnsLbl: TLabel
       Left = 8
       Top = 168
       Width = 54
       Height = 13
       Caption = 'Buttons = 0'
     end
-    object Label17: TLabel
+    object CtrlTrgLbl: TLabel
       Left = 8
       Top = 192
       Width = 51
       Height = 13
       Caption = 'Trigger = 0'
     end
-    object Label19: TLabel
+    object CtrlThXLbl: TLabel
       Left = 8
       Top = 216
       Width = 58
       Height = 13
       Caption = 'ThumbX = 0'
     end
-    object Label20: TLabel
+    object CtrlThYLbl: TLabel
       Left = 8
       Top = 240
       Width = 58
@@ -215,77 +216,77 @@ object Main: TMain
     TabOrder = 3
     OnClick = CloseBtnClick
   end
-  object GroupBox3: TGroupBox
+  object Ctrl2GB: TGroupBox
     Left = 392
     Top = 7
     Width = 185
     Height = 290
     Caption = 'Controller 2'
-    TabOrder = 4
-    object Label21: TLabel
+    TabOrder = 6
+    object Ctrl2XLbl: TLabel
       Left = 8
       Top = 24
       Width = 25
       Height = 13
       Caption = 'X = 0'
     end
-    object Label22: TLabel
+    object Ctrl2YLbl: TLabel
       Left = 8
       Top = 48
       Width = 25
       Height = 13
       Caption = 'Y = 0'
     end
-    object Label23: TLabel
+    object Ctrl2ZLbl: TLabel
       Left = 8
       Top = 72
       Width = 25
       Height = 13
       Caption = 'Z = 0'
     end
-    object Label24: TLabel
+    object Ctrl2YawLbl: TLabel
       Left = 8
       Top = 96
       Width = 39
       Height = 13
       Caption = 'Yaw = 0'
     end
-    object Label25: TLabel
+    object Ctrl2PitchLbl: TLabel
       Left = 8
       Top = 120
       Width = 42
       Height = 13
       Caption = 'Pitch = 0'
     end
-    object Label26: TLabel
+    object Ctrl2RollLbl: TLabel
       Left = 8
       Top = 144
       Width = 36
       Height = 13
       Caption = 'Roll = 0'
     end
-    object Label27: TLabel
+    object Ctrl2BtnsLbl: TLabel
       Left = 8
       Top = 168
       Width = 54
       Height = 13
       Caption = 'Buttons = 0'
     end
-    object Label28: TLabel
+    object Ctrl2TrgLbl: TLabel
       Left = 8
       Top = 192
       Width = 51
       Height = 13
       Caption = 'Trigger = 0'
     end
-    object Label30: TLabel
+    object Ctrl2ThXLbl: TLabel
       Left = 8
       Top = 216
       Width = 58
       Height = 13
       Caption = 'ThumbX = 0'
     end
-    object Label31: TLabel
+    object Ctrl2ThYLbl: TLabel
       Left = 8
       Top = 240
       Width = 58
@@ -293,26 +294,26 @@ object Main: TMain
       Caption = 'ThumbY = 0'
     end
   end
-  object Button1: TButton
+  object CentringBtn: TButton
     Left = 88
     Top = 312
     Width = 75
     Height = 25
     Caption = 'Centring'
-    TabOrder = 5
-    OnClick = Button1Click
+    TabOrder = 1
+    OnClick = CentringBtnClick
   end
-  object Button2: TButton
+  object FeedbackBtn: TButton
     Left = 168
     Top = 312
     Width = 75
     Height = 25
     Caption = 'Feedback'
-    TabOrder = 6
-    OnClick = Button2Click
+    TabOrder = 2
+    OnClick = FeedbackBtnClick
   end
-  object XPManifest1: TXPManifest
-    Left = 184
-    Top = 184
+  object XPManifest: TXPManifest
+    Left = 544
+    Top = 16
   end
 end

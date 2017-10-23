@@ -1,11 +1,11 @@
-object Form1: TForm1
+object Main: TMain
   Left = 192
   Top = 124
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = '[TrueOpenVR] Sample with library use'
-  ClientHeight = 185
-  ClientWidth = 427
+  Caption = 'TrueOpenVR sample with library use'
+  ClientHeight = 153
+  ClientWidth = 272
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,66 +18,66 @@ object Form1: TForm1
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label7: TLabel
-    Left = 216
-    Top = 72
+  object AboutLbl: TLabel
+    Left = 48
+    Top = 120
     Width = 30
     Height = 13
     Alignment = taCenter
     Caption = 'TOVR'
   end
-  object GroupBox1: TGroupBox
+  object hmdGB: TGroupBox
     Left = 8
     Top = 8
-    Width = 169
-    Height = 169
+    Width = 257
+    Height = 105
     Caption = 'HMD'
     TabOrder = 0
-    object Label1: TLabel
+    object xlbl: TLabel
       Left = 8
       Top = 24
       Width = 25
       Height = 13
       Caption = 'X = 0'
     end
-    object Label2: TLabel
+    object yLbl: TLabel
       Left = 8
       Top = 48
       Width = 25
       Height = 13
       Caption = 'Y = 0'
     end
-    object Label3: TLabel
+    object zLbl: TLabel
       Left = 8
       Top = 72
       Width = 25
       Height = 13
       Caption = 'Z = 0'
     end
-    object Label4: TLabel
-      Left = 8
-      Top = 96
+    object yawLbl: TLabel
+      Left = 112
+      Top = 24
       Width = 39
       Height = 13
       Caption = 'Yaw = 0'
     end
-    object Label5: TLabel
-      Left = 8
-      Top = 120
+    object pitchLbl: TLabel
+      Left = 112
+      Top = 48
       Width = 42
       Height = 13
       Caption = 'Pitch = 0'
     end
-    object Label6: TLabel
-      Left = 8
-      Top = 144
+    object rollLbl: TLabel
+      Left = 112
+      Top = 72
       Width = 36
       Height = 13
       Caption = 'Roll = 0'
     end
   end
-  object XPManifest1: TXPManifest
-    Left = 392
-    Top = 8
+  object XPManifest: TXPManifest
+    Left = 224
+    Top = 24
   end
 end

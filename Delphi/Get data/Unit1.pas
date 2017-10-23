@@ -9,52 +9,54 @@ uses
 type
   TMain = class(TForm)
     GetBtn: TButton;
-    GroupBox1: TGroupBox;
-    XPManifest1: TXPManifest;
-    GroupBox2: TGroupBox;
+    hmdGB: TGroupBox;
+    XPManifest: TXPManifest;
+    CtrlGB: TGroupBox;
     CloseBtn: TButton;
-    GroupBox4: TGroupBox;
-    GroupBox5: TGroupBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
-    Label10: TLabel;
-    Label11: TLabel;
-    Label12: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
-    Label15: TLabel;
-    Label16: TLabel;
-    Label17: TLabel;
-    Label19: TLabel;
-    Label20: TLabel;
-    GroupBox3: TGroupBox;
-    Label21: TLabel;
-    Label22: TLabel;
-    Label23: TLabel;
-    Label24: TLabel;
-    Label25: TLabel;
-    Label26: TLabel;
-    Label27: TLabel;
-    Label28: TLabel;
-    Label30: TLabel;
-    Label31: TLabel;
-    Button1: TButton;
-    Button2: TButton;
-    Label32: TLabel;
-    Label18: TLabel;
+    hmdPositionGB: TGroupBox;
+    hmdRotationGB: TGroupBox;
+    hmdXLbl: TLabel;
+    hmdYLbl: TLabel;
+    hmdZlbl: TLabel;
+    hmdYawLbl: TLabel;
+    hmdPitchLbl: TLabel;
+    hmdRollLbl: TLabel;
+    ScrIndLbl: TLabel;
+    ScaleLbl: TLabel;
+    UserResLbl: TLabel;
+    CtrlXLbl: TLabel;
+    CtrlYLbl: TLabel;
+    CtrlZLbl: TLabel;
+    CtrlYawLbl: TLabel;
+    CtrlPitchLbl: TLabel;
+    CtrlRollLbl: TLabel;
+    CtrlBtnsLbl: TLabel;
+    CtrlTrgLbl: TLabel;
+    CtrlThXLbl: TLabel;
+    CtrlThYLbl: TLabel;
+    Ctrl2GB: TGroupBox;
+    Ctrl2XLbl: TLabel;
+    Ctrl2YLbl: TLabel;
+    Ctrl2ZLbl: TLabel;
+    Ctrl2YawLbl: TLabel;
+    Ctrl2PitchLbl: TLabel;
+    Ctrl2RollLbl: TLabel;
+    Ctrl2BtnsLbl: TLabel;
+    Ctrl2TrgLbl: TLabel;
+    Ctrl2ThXLbl: TLabel;
+    Ctrl2ThYLbl: TLabel;
+    CentringBtn: TButton;
+    FeedbackBtn: TButton;
+    AboutLbl: TLabel;
+    RndResLbl: TLabel;
     procedure GetBtnClick(Sender: TObject);
     procedure CloseBtnClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure CentringBtnClick(Sender: TObject);
+    procedure FeedbackBtnClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    procedure GetRegValues;
     { Private declarations }
   public
     { Public declarations }
@@ -91,6 +93,12 @@ end;
   Controller = _Controller;
   TController = Controller;
 
+const
+  GRIPBTN = $0001;
+  THUMBSTICKBTN = $0002;
+  MENUBTN = $0004;
+  SYSTEMBTN = $0008;
+
 var
   Main: TMain;
   LibPath: string;
@@ -99,12 +107,50 @@ var
   GetControllersData: function(out myController, myController2: TController): DWORD; stdcall;
   SetControllerData: function (dwIndex: integer; MotorSpeed: word): DWORD; stdcall;
   SetCentering: function (dwIndex: integer): DWORD; stdcall;
+  ScreenControl: boolean;
+  ScreenIndex: integer;
 
 implementation
 
 {$R *.dfm}
 
-procedure GetLibPath;
+const
+  EDD_GET_DEVICE_INTERFACE_NAME = 1;
+  ENUM_REGISTRY_SETTINGS = DWORD(-2);
+
+procedure DisplayEnable(dwIndex: integer);
+var
+  Display: TDisplayDevice;
+  DevMode: TDevMode;
+begin
+  Display.cb:=SizeOf(TDisplayDevice);
+  EnumDisplayDevices(nil, dwIndex, Display, EDD_GET_DEVICE_INTERFACE_NAME);
+  EnumDisplaySettings(PChar(@Display.DeviceName[0]), ENUM_REGISTRY_SETTINGS, DevMode);
+  DevMode.dmFields:=DM_BITSPERPEL or DM_PELSWIDTH or DM_PELSHEIGHT or DM_DISPLAYFREQUENCY or DM_DISPLAYFLAGS or DM_POSITION;
+  if (Display.StateFlags and DISPLAY_DEVICE_PRIMARY_DEVICE) <> DISPLAY_DEVICE_PRIMARY_DEVICE then begin
+    ChangeDisplaySettingsEx(PChar(@Display.DeviceName[0]), DevMode, 0, CDS_UPDATEREGISTRY or CDS_NORESET, nil);
+    ChangeDisplaySettingsEx(nil, PDevMode(nil)^, 0, 0, nil);
+  end;
+end;
+
+procedure DisplayDisable(dwIndex: integer);
+var
+  Display: TDisplayDevice;
+  DevMode: TDevMode;
+begin
+  Display.cb:=SizeOf(TDisplayDevice);
+  EnumDisplayDevices(nil, dwIndex, Display, EDD_GET_DEVICE_INTERFACE_NAME);
+  ZeroMemory(@DevMode, SizeOf(TDevMode));
+  DevMode.dmSize:=SizeOf(TDevMode);
+  DevMode.dmBitsPerPel:=32;
+  DevMode.dmFields:=DM_BITSPERPEL or DM_PELSWIDTH or DM_PELSHEIGHT or DM_DISPLAYFREQUENCY or DM_DISPLAYFLAGS or DM_POSITION;
+  if (Display.StateFlags and DISPLAY_DEVICE_PRIMARY_DEVICE) <> DISPLAY_DEVICE_PRIMARY_DEVICE then begin
+    ChangeDisplaySettingsEx(PChar(@Display.DeviceName[0]), DevMode, 0, CDS_UPDATEREGISTRY or CDS_NORESET, nil);
+    ChangeDisplaySettingsEx(nil, PDevMode(nil)^, 0, 0, nil);
+  end;
+end;
+
+procedure TMain.GetRegValues;
 var
   Reg: TRegistry;
 begin
@@ -114,6 +160,26 @@ begin
   if Reg.OpenKey('\Software\TrueOpenVR', false) = false then Exit;
   LibPath:=Reg.ReadString('Library');
   if FileExists(LibPath) = false then LibPath:='';
+
+  try
+    ScreenIndex:=Reg.ReadInteger('ScreenIndex');
+    ScrIndLbl.Caption:='Screen index = ' + IntToStr(ScreenIndex);
+    ScreenIndex:=ScreenIndex - 1;
+    ScreenControl:=Reg.ReadBool('ScreenControl');
+
+    if Reg.ReadBool('Scale') = false then
+      ScaleLbl.Caption:='Scale = false'
+    else
+      ScaleLbl.Caption:='Scale = true';
+    UserResLbl.Caption:='User resolution = ' + IntToStr(Reg.ReadInteger('UserWidth')) + ' x ' + IntToStr(Reg.ReadInteger('UserHeight'));
+    RndResLbl.Caption:='Render resolution = ' + IntToStr(Reg.ReadInteger('RenderWidth')) + ' x ' + IntToStr(Reg.ReadInteger('RenderHeight'));
+  except
+    ScrIndLbl.Caption:='Screen index = 1';
+    ScaleLbl.Caption:='Scale = true';
+    UserResLbl.Caption:='User resolution = 1280 x 720';
+    RndResLbl.Caption:='Render resolution = 1280 x 720';
+  end;
+
   Reg.CloseKey;
   Reg.Free;
 end;
@@ -123,50 +189,27 @@ var
   myHMD: THMD; myController, myController2: TController;
   keys: string;
   iResult: integer;
-  Reg: TRegistry;
 begin
   //HMD
   iResult:=GetHMDData(myHMD);
     if iResult = 0 then ShowMessage('HMD not found');
-  Label1.Caption:='X = ' + FloatToStr(myHMD.X);
-  Label2.Caption:='Y = ' + FloatToStr(myHMD.Y);
-  Label3.Caption:='Z = ' + FloatToStr(myHMD.Z);
-  Label4.Caption:='Yaw = ' + FloatToStr(myHMD.Yaw);
-  Label5.Caption:='Pitch = ' + FloatToStr(myHMD.Pitch);
-  Label6.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
-
-  //VR Init info
-  Reg:=TRegistry.Create;
-  Reg.RootKey:=HKEY_CURRENT_USER;
-  if Reg.OpenKey('\Software\TrueOpenVR', false) then begin
-  try
-  if Reg.ReadBool('Scale') = false then
-    Label8.Caption:='Scale = false'
-  else
-    Label8.Caption:='Scale = true';
-    Label7.Caption:='Screen index = ' + IntToStr(Reg.ReadInteger('ScreenIndex'));
-    Label9.Caption:='User resolution = ' + IntToStr(Reg.ReadInteger('UserWidth')) + ' x ' + IntToStr(Reg.ReadInteger('UserHeight'));
-    Label18.Caption:='Render resolution = ' + IntToStr(Reg.ReadInteger('RenderWidth')) + ' x ' + IntToStr(Reg.ReadInteger('RenderHeight'));
-  except
-    Label7.Caption:='Screen index = 1';
-    Label8.Caption:='Scale = true';
-    Label9.Caption:='User resolution = 1280 x 720';
-    Label18.Caption:='Render resolution = 1280 x 720';
-  end;
-  Reg.CloseKey;
-  end;
-  Reg.Free;
+  hmdXLbl.Caption:='X = ' + FloatToStr(myHMD.X);
+  hmdYLbl.Caption:='Y = ' + FloatToStr(myHMD.Y);
+  hmdZLbl.Caption:='Z = ' + FloatToStr(myHMD.Z);
+  hmdYawLbl.Caption:='Yaw = ' + FloatToStr(myHMD.Yaw);
+  hmdPitchLbl.Caption:='Pitch = ' + FloatToStr(myHMD.Pitch);
+  hmdRollLbl.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
 
   //Controllers
   iResult:=GetControllersData(myController, myController2);
     if iResult = 0 then ShowMessage('Controllers not found');
-  Label10.Caption:='X = ' + FloatToStr(myController.X);
-  Label11.Caption:='Y = ' + FloatToStr(myController.Y);
-  Label12.Caption:='Z = ' + FloatToStr(myController.Z);
+  CtrlXLbl.Caption:='X = ' + FloatToStr(myController.X);
+  CtrlYLbl.Caption:='Y = ' + FloatToStr(myController.Y);
+  CtrlZLbl.Caption:='Z = ' + FloatToStr(myController.Z);
 
-  Label13.Caption:='Yaw = ' + FloatToStr(myController.Yaw);
-  Label14.Caption:='Pitch = ' + FloatToStr(myController.Pitch);
-  Label15.Caption:='Roll = ' + FloatToStr(myController.Roll);
+  CtrlYawLbl.Caption:='Yaw = ' + FloatToStr(myController.Yaw);
+  CtrlPitchLbl.Caption:='Pitch = ' + FloatToStr(myController.Pitch);
+  CtrlRollLbl.Caption:='Roll = ' + FloatToStr(myController.Roll);
 
   if (myController.Buttons and 1) <> 0 then keys:=keys + 'GP ';
   if (myController.Buttons and 2) <> 0 then keys:=keys + 'TS ';
@@ -174,76 +217,102 @@ begin
   if (myController.Buttons and 8) <> 0 then keys:=keys + 'SM ';
 
   if keys <> '' then
-    Label16.Caption:='Buttons = ' + keys;
+    CtrlBtnsLbl.Caption:='Buttons = ' + keys;
 
-  Label17.Caption:='Trigger = ' + IntToStr(myController.Trigger);
+  CtrlTrgLbl.Caption:='Trigger = ' + IntToStr(myController.Trigger);
 
-  Label19.Caption:='ThumbX = ' + IntToStr(myController.ThumbX);
-  Label20.Caption:='ThumbY = ' + IntToStr(myController.ThumbY);
+  CtrlThXLbl.Caption:='ThumbX = ' + IntToStr(myController.ThumbX);
+  CtrlThYLbl.Caption:='ThumbY = ' + IntToStr(myController.ThumbY);
 
   //Controller 2
-  Label21.Caption:='X = ' + FloatToStr(myController2.X);
-  Label22.Caption:='Y = ' + FloatToStr(myController2.Y);
-  Label23.Caption:='Z = ' + FloatToStr(myController2.Z);
+  Ctrl2XLbl.Caption:='X = ' + FloatToStr(myController2.X);
+  Ctrl2YLbl.Caption:='Y = ' + FloatToStr(myController2.Y);
+  Ctrl2ZLbl.Caption:='Z = ' + FloatToStr(myController2.Z);
 
-  Label24.Caption:='Yaw = ' + FloatToStr(myController2.Yaw);
-  Label25.Caption:='Pitch = ' + FloatToStr(myController2.Pitch);
-  Label26.Caption:='Roll = ' + FloatToStr(myController2.Roll);
+  Ctrl2YawLbl.Caption:='Yaw = ' + FloatToStr(myController2.Yaw);
+  Ctrl2PitchLbl.Caption:='Pitch = ' + FloatToStr(myController2.Pitch);
+  Ctrl2RollLbl.Caption:='Roll = ' + FloatToStr(myController2.Roll);
 
   keys:='';
 
-  if (myController2.Buttons and 1) <> 0 then keys:=keys + 'GP ';
-  if (myController2.Buttons and 2) <> 0 then keys:=keys + 'TS ';
-  if (myController2.Buttons and 4) <> 0 then keys:=keys + 'MN ';
-  if (myController2.Buttons and 8) <> 0 then keys:=keys + 'SM ';
+  if (myController2.Buttons and GRIPBTN) <> 0 then keys:=keys + 'GP ';
+  if (myController2.Buttons and THUMBSTICKBTN) <> 0 then keys:=keys + 'TS ';
+  if (myController2.Buttons and MENUBTN) <> 0 then keys:=keys + 'MN ';
+  if (myController2.Buttons and SYSTEMBTN) <> 0 then keys:=keys + 'SM ';
 
   if keys <> '' then
-    Label27.Caption:='Buttons = ' + keys;
+    Ctrl2BtnsLbl.Caption:='Buttons = ' + keys;
 
 
-  Label28.Caption:='Trigger = ' + IntToStr(myController2.Trigger);
+  Ctrl2TrgLbl.Caption:='Trigger = ' + IntToStr(myController2.Trigger);
 
-  Label30.Caption:='ThumbX = ' + IntToStr(myController2.ThumbX);
-  Label31.Caption:='ThumbY = ' + IntToStr(myController2.ThumbY);
+  Ctrl2ThXLbl.Caption:='ThumbX = ' + IntToStr(myController2.ThumbX);
+  Ctrl2ThYLbl.Caption:='ThumbY = ' + IntToStr(myController2.ThumbY);
 end;
 
 procedure TMain.CloseBtnClick(Sender: TObject);
 begin
-  if DllHandle <> 0 then
-    FreeLibrary(DllHandle);
   Close;
 end;
 
 procedure TMain.FormCreate(Sender: TObject);
 begin
-  Label32.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all devices';
+  AboutLbl.Caption:='TOVR - Open Source Virtual Reality' + #13#10 + 'standard for all devices';
   Application.Title:=Caption;
 
-  GetLibPath;
+  GetRegValues;
   if LibPath <> '' then begin
     DllHandle:=LoadLibrary(PChar(LibPath));
     @GetHMDData:=GetProcAddress(DllHandle, 'GetHMDData');
     @GetControllersData:=GetProcAddress(DllHandle, 'GetControllersData');
     @SetControllerData:=GetProcAddress(DllHandle, 'SetControllerData');
     @SetCentering:=GetProcAddress(DllHandle, 'SetCentering');
+    if ScreenControl then
+      DisplayEnable(ScreenIndex);
   end else begin
     ShowMessage('TrueOpenVR not found');
     Halt;
   end;
 end;
 
-procedure TMain.Button1Click(Sender: TObject);
-var
-  iResult: integer;
+procedure TMain.CentringBtnClick(Sender: TObject);
 begin
-  iResult:=SetCentering(0);
-  if iResult = 1 then ShowMessage('Centering success');
+  if SetCentering(0) = 1 then
+    ShowMessage('HMD centering success')
+  else
+    ShowMessage('HMD centering failure');
+
+  if SetCentering(1) = 1 then
+    ShowMessage('Controller 1 centering success')
+  else
+    ShowMessage('Controller 1 centering failure');
+
+  if SetCentering(1) = 1 then
+    ShowMessage('Controller 2 centering success')
+  else
+    ShowMessage('Controller 2 centering failure');
 end;
 
-procedure TMain.Button2Click(Sender: TObject);
+procedure TMain.FeedbackBtnClick(Sender: TObject);
 begin
-  SetControllerData(1, 32761);
-  SetControllerData(2, 65535);
+  if SetControllerData(1, 12000) = 1 then
+    ShowMessage('Controller 1 Feedback success')
+  else
+    ShowMessage('Controller 1 Feedback failure');
+
+  if SetControllerData(2, 12000) = 1 then
+    ShowMessage('Controller 2 Feedback success')
+  else
+    ShowMessage('Controller 2 Feedback failure');
+end;
+
+procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if DllHandle <> 0 then begin
+    FreeLibrary(DllHandle);
+    if ScreenControl then
+      DisplayDisable(ScreenIndex);
+  end;
 end;
 
 end.
