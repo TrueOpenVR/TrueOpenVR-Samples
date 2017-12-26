@@ -4,7 +4,7 @@ object Main: TMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'TrueOpenVR Get Data'
-  ClientHeight = 345
+  ClientHeight = 322
   ClientWidth = 583
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object Main: TMain
   TextHeight = 13
   object AboutLbl: TLabel
     Left = 400
-    Top = 312
+    Top = 288
     Width = 30
     Height = 13
     Alignment = taCenter
@@ -28,7 +28,7 @@ object Main: TMain
   end
   object GetBtn: TButton
     Left = 8
-    Top = 312
+    Top = 288
     Width = 75
     Height = 25
     Caption = 'Get'
@@ -39,7 +39,7 @@ object Main: TMain
     Left = 8
     Top = 8
     Width = 185
-    Height = 289
+    Height = 265
     Caption = 'HMD'
     TabOrder = 4
     object ScrIndLbl: TLabel
@@ -49,23 +49,16 @@ object Main: TMain
       Height = 13
       Caption = 'Screen index = 0'
     end
-    object ScaleLbl: TLabel
+    object IPDLbl: TLabel
       Left = 8
       Top = 216
-      Width = 61
+      Width = 36
       Height = 13
-      Caption = 'Scale = false'
-    end
-    object UserResLbl: TLabel
-      Left = 8
-      Top = 240
-      Width = 105
-      Height = 13
-      Caption = 'User resolution = 0 x 0'
+      Caption = 'IPD = 0'
     end
     object RndResLbl: TLabel
       Left = 8
-      Top = 264
+      Top = 240
       Width = 118
       Height = 13
       Caption = 'Render resolution = 0 x 0'
@@ -133,7 +126,7 @@ object Main: TMain
     Left = 200
     Top = 8
     Width = 185
-    Height = 289
+    Height = 265
     Caption = 'Controller 1'
     TabOrder = 5
     object CtrlXLbl: TLabel
@@ -209,7 +202,7 @@ object Main: TMain
   end
   object CloseBtn: TButton
     Left = 248
-    Top = 312
+    Top = 288
     Width = 75
     Height = 25
     Caption = 'Close'
@@ -220,7 +213,7 @@ object Main: TMain
     Left = 392
     Top = 7
     Width = 185
-    Height = 290
+    Height = 266
     Caption = 'Controller 2'
     TabOrder = 6
     object Ctrl2XLbl: TLabel
@@ -296,7 +289,7 @@ object Main: TMain
   end
   object CentringBtn: TButton
     Left = 88
-    Top = 312
+    Top = 288
     Width = 75
     Height = 25
     Caption = 'Centring'
@@ -305,7 +298,7 @@ object Main: TMain
   end
   object FeedbackBtn: TButton
     Left = 168
-    Top = 312
+    Top = 288
     Width = 75
     Height = 25
     Caption = 'Feedback'

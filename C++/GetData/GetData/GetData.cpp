@@ -82,7 +82,7 @@ int main()
 	//Read parameters from registry
 	CRegKey key;
 	TCHAR libPath[MAX_PATH];
-	DWORD ScreenIndex, ScreenControl, UserWidth, UserHeight, Scale, RenderWidth, RenderHeight;
+	DWORD ScreenIndex, ScreenControl, RenderWidth, RenderHeight;
 	
 	LONG status = key.Open(HKEY_CURRENT_USER, _T("Software\\TrueOpenVR"));
 	if (status == ERROR_SUCCESS)
@@ -104,9 +104,6 @@ int main()
 		key.QueryDWORDValue(_T("ScreenIndex"), ScreenIndex);
 		key.QueryDWORDValue(_T("ScreenControl"), ScreenControl);
 		ScreenIndex -= 1;
-		key.QueryDWORDValue(_T("UserWidth"), UserWidth);
-		key.QueryDWORDValue(_T("UserHeight"), UserHeight);
-		key.QueryDWORDValue(_T("Scale"), Scale);
 		key.QueryDWORDValue(_T("RenderWidth"), RenderWidth);
 		key.QueryDWORDValue(_T("RenderHeight"), RenderHeight);
 	}
@@ -185,14 +182,16 @@ int main()
 
 	DWORD Result;
 
+	Sleep(100);
+
 	//Get data
 	while (true) {
 		system("cls");
 
 		printf("Window parameters\r\nWidth=%d, Height=%d, Left=%d, ", DevMode.dmPelsWidth, DevMode.dmPelsHeight, DevMode.dmPosition);
-		printf("UserWidth=%d, UserHeight=%d,\r\nScale=%d, ", UserWidth, UserHeight, Scale);
-		printf("RenderWidth=%d, RenderHeight=%d, ", RenderWidth, RenderHeight);
-		printf("Refresh rate=%d\r\n\r\n", DevMode.dmDisplayFrequency);
+		printf("Refresh rate=%d\r\n", DevMode.dmDisplayFrequency);
+		printf("RenderWidth=%d, RenderHeight=%d\r\n\r\n", RenderWidth, RenderHeight);
+		
 		
 		Result = GetHMDData(&myHMD);
 		if (Result) { 
@@ -239,7 +238,7 @@ int main()
 		printf("\r\nHotkeys\r\n\HMD centring\t\tCTRL + ALT + R\r\nController 1 centring\tCTRL + ALT + 1\r\nController 2 centring\tCTRL + ALT + 2\r\nController feedback\tCTRL + ALT + 3\r\nExit\t\t\tESC\r\n");
 
 
-		if ((GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0) break;
+		if ((GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0 || (GetAsyncKeyState(VK_RETURN) & 0x8000)) break;
 
 		//Centring
 		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0 && (GetAsyncKeyState(VK_MENU) & 0x8000) != 0 && (GetAsyncKeyState(82) & 0x8000) != 0) //HMD - CTRL + ALT + R 

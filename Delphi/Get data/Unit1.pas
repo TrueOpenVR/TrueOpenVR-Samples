@@ -22,8 +22,7 @@ type
     hmdPitchLbl: TLabel;
     hmdRollLbl: TLabel;
     ScrIndLbl: TLabel;
-    ScaleLbl: TLabel;
-    UserResLbl: TLabel;
+    IPDLbl: TLabel;
     CtrlXLbl: TLabel;
     CtrlYLbl: TLabel;
     CtrlZLbl: TLabel;
@@ -69,7 +68,7 @@ type
     X: double;
     Y: double;
     Z: double;
-    Yaw: double;
+    Yaw: real;
     Pitch: double;
     Roll: double;
 end;
@@ -166,18 +165,9 @@ begin
     ScrIndLbl.Caption:='Screen index = ' + IntToStr(ScreenIndex);
     ScreenIndex:=ScreenIndex - 1;
     ScreenControl:=Reg.ReadBool('ScreenControl');
-
-    if Reg.ReadBool('Scale') = false then
-      ScaleLbl.Caption:='Scale = false'
-    else
-      ScaleLbl.Caption:='Scale = true';
-    UserResLbl.Caption:='User resolution = ' + IntToStr(Reg.ReadInteger('UserWidth')) + ' x ' + IntToStr(Reg.ReadInteger('UserHeight'));
+    IPDLbl.Caption:='IPD = ' + FloatToStr(Reg.ReadFloat('IPD'));
     RndResLbl.Caption:='Render resolution = ' + IntToStr(Reg.ReadInteger('RenderWidth')) + ' x ' + IntToStr(Reg.ReadInteger('RenderHeight'));
   except
-    ScrIndLbl.Caption:='Screen index = 1';
-    ScaleLbl.Caption:='Scale = true';
-    UserResLbl.Caption:='User resolution = 1280 x 720';
-    RndResLbl.Caption:='Render resolution = 1280 x 720';
   end;
 
   Reg.CloseKey;
