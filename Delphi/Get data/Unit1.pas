@@ -68,7 +68,7 @@ type
     X: double;
     Y: double;
     Z: double;
-    Yaw: real;
+    Yaw: double;
     Pitch: double;
     Roll: double;
 end;
