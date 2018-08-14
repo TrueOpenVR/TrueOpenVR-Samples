@@ -210,7 +210,7 @@ int main()
 			printf("Controller 1, controllers off\r\n");
 		}
 		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f,\r\n", myController.X, myController.Y, myController.Z, myController.Yaw, myController.Pitch, myController.Roll);
-		printf("Trigger=%3d, ThumbX=%6d, ThumbY=%6d\r\n", myController.Trigger, myController.ThumbX, myController.ThumbY);
+		printf("Buttons=%d, Trigger=%3d, ThumbX=%6d, ThumbY=%6d\r\n", myController.Buttons, myController.Trigger, myController.ThumbX, myController.ThumbY);
 
 		if ((myController.Buttons & GRIPBTN) || (myController.Buttons & THUMBSTICKBTN) || (myController.Buttons & MENUBTN) || (myController.Buttons & SYSTEMBTN)) {
 			printf("Buttons pressed: ");
