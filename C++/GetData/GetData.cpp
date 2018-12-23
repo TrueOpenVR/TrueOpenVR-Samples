@@ -2,11 +2,6 @@
 //#include <Windows.h>
 #include <atlbase.h>
 
-#define GRIPBTN 0x0001
-#define THUMBSTICKBTN 0x0002
-#define MENUBTN 0x0004
-#define SYSTEMBTN 0x0008
-
 typedef struct _HMDData
 {
 	double	X;
@@ -25,15 +20,25 @@ typedef struct _Controller
 	double	Yaw;
 	double	Pitch;
 	double	Roll;
-	WORD	Buttons;
-	BYTE	Trigger;
-	SHORT	ThumbX;
-	SHORT	ThumbY;
+	unsigned short	Buttons;
+	float	Trigger;
+	float	AxisX;
+	float	AxisY;
 } TController, *PController;
 
-typedef DWORD(__stdcall *_GetHMDData)(__out THMD* myHMD);
-typedef DWORD(__stdcall *_GetControllersData)(__out TController *myController, __out TController *myController2);
-typedef DWORD(__stdcall *_SetControllerData)(__in int dwIndex, __in WORD MotorSpeed);
+#define TOVR_SUCCESS 0
+#define TOVR_FAILURE 1
+
+#define GRIP_BTN	0x0001
+#define THUMB_BTN	0x0002
+#define A_BTN		0x0004
+#define B_BTN		0x0008
+#define MENU_BTN	0x0010
+#define SYS_BTN		0x0020
+
+typedef DWORD(__stdcall *_GetHMDData)(__out THMD *HMD);
+typedef DWORD(__stdcall *_GetControllersData)(__out TController *FirstController, __out TController *SecondController);
+typedef DWORD(__stdcall *_SetControllerData)(__in int dwIndex, __in unsigned char MotorSpeed);
 typedef DWORD(__stdcall *_SetCentering)(__in int dwIndex);
 
 int DisplayEnable(int dwIndex)
@@ -177,8 +182,8 @@ int main()
 		EnumDisplaySettings((LPCTSTR)Display.DeviceName, ENUM_REGISTRY_SETTINGS, &DevMode);
 	}
 
-	THMD myHMD;
-	TController myController, myController2;
+	THMD MyHMD;
+	TController MyController, MyController2;
 
 	DWORD Result;
 
@@ -193,44 +198,51 @@ int main()
 		printf("RenderWidth=%d, RenderHeight=%d\r\n\r\n", RenderWidth, RenderHeight);
 		
 		
-		Result = GetHMDData(&myHMD);
-		if (Result) { 
+		Result = GetHMDData(&MyHMD);
+		if (Result != TOVR_FAILURE) {
 			printf("HMD = on\r\n"); 
 		} else { 
 			printf("HMD = off\r\n"); 
 		}
 		
-		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f\r\n\r\n", myHMD.X, myHMD.Y, myHMD.Z, myHMD.Yaw, myHMD.Pitch, myHMD.Roll);
+		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f\r\n\r\n", MyHMD.X, MyHMD.Y, MyHMD.Z, MyHMD.Yaw, MyHMD.Pitch, MyHMD.Roll);
 
-		Result = GetControllersData(&myController, &myController2);
-		if (Result) {
+		Result = GetControllersData(&MyController, &MyController2);
+		if (Result != TOVR_FAILURE) {
 			printf("Controller 1, controllers on\r\n");
 		}
 		else {
 			printf("Controller 1, controllers off\r\n");
 		}
-		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f,\r\n", myController.X, myController.Y, myController.Z, myController.Yaw, myController.Pitch, myController.Roll);
-		printf("Buttons=%d, Trigger=%3d, ThumbX=%6d, ThumbY=%6d\r\n", myController.Buttons, myController.Trigger, myController.ThumbX, myController.ThumbY);
+		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f,\r\n", MyController.X, MyController.Y, MyController.Z, MyController.Yaw, MyController.Pitch, MyController.Roll);
+		printf("Buttons=%d, Trigger=%7.2f, AxisX=%7.2f, AxisY=%7.2f\r\n", MyController.Buttons, MyController.Trigger, MyController.AxisX, MyController.AxisY);
 
-		if ((myController.Buttons & GRIPBTN) || (myController.Buttons & THUMBSTICKBTN) || (myController.Buttons & MENUBTN) || (myController.Buttons & SYSTEMBTN)) {
+		if ((MyController.Buttons & GRIP_BTN) || (MyController.Buttons & THUMB_BTN) || (MyController.Buttons & A_BTN) ||
+			(MyController.Buttons & B_BTN) || (MyController.Buttons & MENU_BTN) || (MyController.Buttons & SYS_BTN)) {
 			printf("Buttons pressed: ");
-			if (myController.Buttons & GRIPBTN) printf("GRIP ");
-			if (myController.Buttons & THUMBSTICKBTN) printf("Thumbstick ");
-			if (myController.Buttons & MENUBTN) printf("Menu ");
-			if (myController.Buttons & SYSTEMBTN) printf("System ");
+			if (MyController.Buttons & GRIP_BTN) printf("GRIP ");
+			if (MyController.Buttons & THUMB_BTN) printf("Thumbstick ");
+			if (MyController.Buttons & A_BTN) printf("A ");
+			if (MyController.Buttons & B_BTN) printf("B ");
+			if (MyController.Buttons & MENU_BTN) printf("Menu ");
+			if (MyController.Buttons & SYS_BTN) printf("System ");
 			printf("\r\n");
-		} else printf("Buttons pressed: -\r\n");
+		}
+		else printf("Buttons pressed: -\r\n");
 
 		printf("\r\nController 2\r\n");
-		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f,\r\n", myController2.X, myController2.Y, myController2.Z, myController2.Yaw, myController2.Pitch, myController2.Roll);
-		printf("Buttons=%d, Trigger=%3d, ThumbX=%6d, ThumbY=%6d\r\n", myController2.Buttons, myController2.Trigger, myController2.ThumbX, myController2.ThumbY);
+		printf("X=%5.2f, Y=%5.2f, Z=%5.2f, Yaw=%7.2f, Pitch=%7.2f, Roll=%7.2f,\r\n", MyController2.X, MyController2.Y, MyController2.Z, MyController2.Yaw, MyController2.Pitch, MyController2.Roll);
+		printf("Buttons=%d, Trigger=%7.2f, AxisX=%7.2f, AxisY=%7.2f\r\n", MyController2.Buttons, MyController2.Trigger, MyController2.AxisX, MyController2.AxisY);
 
-		if ((myController2.Buttons & GRIPBTN) || (myController2.Buttons & THUMBSTICKBTN) || (myController2.Buttons & MENUBTN) || (myController2.Buttons & SYSTEMBTN)) {
+		if ((MyController2.Buttons & GRIP_BTN) || (MyController2.Buttons & THUMB_BTN) || (MyController2.Buttons & A_BTN) ||
+			(MyController2.Buttons & B_BTN) || (MyController2.Buttons & MENU_BTN) || (MyController2.Buttons & SYS_BTN)) {
 			printf("Buttons pressed: ");
-			if (myController2.Buttons & GRIPBTN) printf("GRIP ");
-			if (myController2.Buttons & THUMBSTICKBTN) printf("Thumbstick ");
-			if (myController2.Buttons & MENUBTN) printf("Menu ");
-			if (myController2.Buttons & SYSTEMBTN) printf("System ");
+			if (MyController2.Buttons & GRIP_BTN) printf("GRIP ");
+			if (MyController2.Buttons & THUMB_BTN) printf("Thumbstick ");
+			if (MyController2.Buttons & A_BTN) printf("A ");
+			if (MyController2.Buttons & B_BTN) printf("B ");
+			if (MyController2.Buttons & MENU_BTN) printf("Menu ");
+			if (MyController2.Buttons & SYS_BTN) printf("System ");
 			printf("\r\n");
 		}
 		else printf("Buttons pressed: -\r\n");
@@ -252,8 +264,8 @@ int main()
 
 		//Vibration
 		if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0 && (GetAsyncKeyState(VK_MENU) & 0x8000) != 0 && (GetAsyncKeyState(51) & 0x8000) != 0) {//CTRL + ALT + 3
-			SetControllerData(1, 12000);
-			SetControllerData(2, 12000);
+			SetControllerData(1, 100);
+			SetControllerData(2, 100);
 		}
 
 	}

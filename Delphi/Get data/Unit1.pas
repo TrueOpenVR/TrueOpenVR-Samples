@@ -85,9 +85,9 @@ end;
     Pitch: double;
     Roll: double;
     Buttons: word;
-    Trigger: byte;
-    ThumbX: smallint;
-    ThumbY: smallint;
+    Trigger: single;
+    AxisX: single;
+    AxisY: single;
 end;
   Controller = _Controller;
   TController = Controller;
@@ -98,13 +98,23 @@ const
   MENUBTN = $0004;
   SYSTEMBTN = $0008;
 
+  TOVR_SUCCESS = 0;
+  TOVR_FAILURE = 1;
+
+  GRIP_BTN = $0001;
+  THUMB_BTN = $0002;
+  A_BTN = $0004;
+  B_BTN = $0008;
+  MENU_BTN = $0010;
+  SYS_BTN = $0020;
+
 var
   Main: TMain;
   LibPath: string;
   DllHandle: HMODULE;
-  GetHMDData: function(out myHMD: THMD): DWORD; stdcall;
-  GetControllersData: function(out myController, myController2: TController): DWORD; stdcall;
-  SetControllerData: function (dwIndex: integer; MotorSpeed: word): DWORD; stdcall;
+  GetHMDData: function(out MyHMD: THMD): DWORD; stdcall;
+  GetControllersData: function(out FirstController, SecondController: TController): DWORD; stdcall;
+  SetControllerData: function (dwIndex: integer; MotorSpeed: byte): DWORD; stdcall;
   SetCentering: function (dwIndex: integer): DWORD; stdcall;
   ScreenControl: boolean;
   ScreenIndex: integer;
@@ -176,68 +186,75 @@ end;
 
 procedure TMain.GetBtnClick(Sender: TObject);
 var
-  myHMD: THMD; myController, myController2: TController;
-  keys: string;
-  iResult: integer;
+  MyHMD: THMD; MyController, MyController2: TController;
+  Buttons: string;
 begin
   //HMD
-  iResult:=GetHMDData(myHMD);
-    if iResult = 0 then ShowMessage('HMD not found');
-  hmdXLbl.Caption:='X = ' + FloatToStr(myHMD.X);
-  hmdYLbl.Caption:='Y = ' + FloatToStr(myHMD.Y);
-  hmdZLbl.Caption:='Z = ' + FloatToStr(myHMD.Z);
-  hmdYawLbl.Caption:='Yaw = ' + FloatToStr(myHMD.Yaw);
-  hmdPitchLbl.Caption:='Pitch = ' + FloatToStr(myHMD.Pitch);
-  hmdRollLbl.Caption:='Roll = ' + FloatToStr(myHMD.Roll);
+  if GetHMDData(MyHMD) = TOVR_FAILURE then
+    ShowMessage('HMD not found');
+  HmdXLbl.Caption:='X = ' + FloatToStr(MyHMD.X);
+  HmdYLbl.Caption:='Y = ' + FloatToStr(MyHMD.Y);
+  HmdZLbl.Caption:='Z = ' + FloatToStr(MyHMD.Z);
+  HmdYawLbl.Caption:='Yaw = ' + FloatToStr(MyHMD.Yaw);
+  HmdPitchLbl.Caption:='Pitch = ' + FloatToStr(MyHMD.Pitch);
+  HmdRollLbl.Caption:='Roll = ' + FloatToStr(MyHMD.Roll);
 
   //Controllers
-  iResult:=GetControllersData(myController, myController2);
-    if iResult = 0 then ShowMessage('Controllers not found');
-  CtrlXLbl.Caption:='X = ' + FloatToStr(myController.X);
-  CtrlYLbl.Caption:='Y = ' + FloatToStr(myController.Y);
-  CtrlZLbl.Caption:='Z = ' + FloatToStr(myController.Z);
+  if GetControllersData(MyController, MyController2) = TOVR_FAILURE then
+    ShowMessage('Controllers not found');
+  CtrlXLbl.Caption:='X = ' + FloatToStr(MyController.X);
+  CtrlYLbl.Caption:='Y = ' + FloatToStr(MyController.Y);
+  CtrlZLbl.Caption:='Z = ' + FloatToStr(MyController.Z);
 
-  CtrlYawLbl.Caption:='Yaw = ' + FloatToStr(myController.Yaw);
-  CtrlPitchLbl.Caption:='Pitch = ' + FloatToStr(myController.Pitch);
-  CtrlRollLbl.Caption:='Roll = ' + FloatToStr(myController.Roll);
+  CtrlYawLbl.Caption:='Yaw = ' + FloatToStr(MyController.Yaw);
+  CtrlPitchLbl.Caption:='Pitch = ' + FloatToStr(MyController.Pitch);
+  CtrlRollLbl.Caption:='Roll = ' + FloatToStr(MyController.Roll);
 
-  if (myController.Buttons and 1) <> 0 then keys:=keys + 'GP ';
-  if (myController.Buttons and 2) <> 0 then keys:=keys + 'TS ';
-  if (myController.Buttons and 4) <> 0 then keys:=keys + 'MN ';
-  if (myController.Buttons and 8) <> 0 then keys:=keys + 'SM ';
+  Buttons:='';
+  if (MyController.Buttons and GRIP_BTN) <> 0 then Buttons:=Buttons + 'GP ';
+  if (MyController.Buttons and THUMB_BTN) <> 0 then Buttons:=Buttons + 'TS ';
+  if (MyController.Buttons and A_BTN) <> 0 then Buttons:=Buttons + 'A ';
+  if (MyController.Buttons and B_BTN) <> 0 then Buttons:=Buttons + 'B ';
+  if (MyController.Buttons and MENU_BTN) <> 0 then Buttons:=Buttons + 'MN ';
+  if (MyController.Buttons and SYS_BTN) <> 0 then Buttons:=Buttons + 'SM ';
 
-  if keys <> '' then
-    CtrlBtnsLbl.Caption:='Buttons = ' + keys;
+  if Buttons <> '' then
+    CtrlBtnsLbl.Caption:='Buttons = ' + Buttons
+  else
+    CtrlBtnsLbl.Caption:='Buttons = 0';
 
-  CtrlTrgLbl.Caption:='Trigger = ' + IntToStr(myController.Trigger);
+  CtrlTrgLbl.Caption:='Trigger = ' + FloatToStr(MyController.Trigger);
 
-  CtrlThXLbl.Caption:='ThumbX = ' + IntToStr(myController.ThumbX);
-  CtrlThYLbl.Caption:='ThumbY = ' + IntToStr(myController.ThumbY);
+  CtrlThXLbl.Caption:='AxisX = ' + FloatToStr(MyController.AxisX);
+  CtrlThYLbl.Caption:='AxisY = ' + FloatToStr(MyController.AxisY);
 
   //Controller 2
-  Ctrl2XLbl.Caption:='X = ' + FloatToStr(myController2.X);
-  Ctrl2YLbl.Caption:='Y = ' + FloatToStr(myController2.Y);
-  Ctrl2ZLbl.Caption:='Z = ' + FloatToStr(myController2.Z);
+  Ctrl2XLbl.Caption:='X = ' + FloatToStr(MyController2.X);
+  Ctrl2YLbl.Caption:='Y = ' + FloatToStr(MyController2.Y);
+  Ctrl2ZLbl.Caption:='Z = ' + FloatToStr(MyController2.Z);
 
-  Ctrl2YawLbl.Caption:='Yaw = ' + FloatToStr(myController2.Yaw);
-  Ctrl2PitchLbl.Caption:='Pitch = ' + FloatToStr(myController2.Pitch);
-  Ctrl2RollLbl.Caption:='Roll = ' + FloatToStr(myController2.Roll);
+  Ctrl2YawLbl.Caption:='Yaw = ' + FloatToStr(MyController2.Yaw);
+  Ctrl2PitchLbl.Caption:='Pitch = ' + FloatToStr(MyController2.Pitch);
+  Ctrl2RollLbl.Caption:='Roll = ' + FloatToStr(MyController2.Roll);
 
-  keys:='';
+  Buttons:='';
+  if (MyController2.Buttons and GRIP_BTN) <> 0 then Buttons:=Buttons + 'GP ';
+  if (MyController2.Buttons and THUMB_BTN) <> 0 then Buttons:=Buttons + 'TS ';
+  if (MyController2.Buttons and A_BTN) <> 0 then Buttons:=Buttons + 'A ';
+  if (MyController2.Buttons and B_BTN) <> 0 then Buttons:=Buttons + 'B ';
+  if (MyController2.Buttons and MENU_BTN) <> 0 then Buttons:=Buttons + 'MN ';
+  if (MyController2.Buttons and SYS_BTN) <> 0 then Buttons:=Buttons + 'SM ';
 
-  if (myController2.Buttons and GRIPBTN) <> 0 then keys:=keys + 'GP ';
-  if (myController2.Buttons and THUMBSTICKBTN) <> 0 then keys:=keys + 'TS ';
-  if (myController2.Buttons and MENUBTN) <> 0 then keys:=keys + 'MN ';
-  if (myController2.Buttons and SYSTEMBTN) <> 0 then keys:=keys + 'SM ';
-
-  if keys <> '' then
-    Ctrl2BtnsLbl.Caption:='Buttons = ' + keys;
+  if Buttons <> '' then
+    Ctrl2BtnsLbl.Caption:='Buttons = ' + Buttons
+  else
+    Ctrl2BtnsLbl.Caption:='Buttons = 0';
 
 
-  Ctrl2TrgLbl.Caption:='Trigger = ' + IntToStr(myController2.Trigger);
+  Ctrl2TrgLbl.Caption:='Trigger = ' + FloatToStr(MyController2.Trigger);
 
-  Ctrl2ThXLbl.Caption:='ThumbX = ' + IntToStr(myController2.ThumbX);
-  Ctrl2ThYLbl.Caption:='ThumbY = ' + IntToStr(myController2.ThumbY);
+  Ctrl2ThXLbl.Caption:='AxisX = ' + FloatToStr(MyController2.AxisX);
+  Ctrl2ThYLbl.Caption:='AxisY = ' + FloatToStr(MyController2.AxisY);
 end;
 
 procedure TMain.CloseBtnClick(Sender: TObject);
@@ -267,17 +284,17 @@ end;
 
 procedure TMain.CentringBtnClick(Sender: TObject);
 begin
-  if SetCentering(0) = 1 then
+  if SetCentering(0) = TOVR_SUCCESS then
     ShowMessage('HMD centering success')
   else
     ShowMessage('HMD centering failure');
 
-  if SetCentering(1) = 1 then
+  if SetCentering(1) = TOVR_SUCCESS then
     ShowMessage('Controller 1 centering success')
   else
     ShowMessage('Controller 1 centering failure');
 
-  if SetCentering(1) = 1 then
+  if SetCentering(1) = TOVR_SUCCESS then
     ShowMessage('Controller 2 centering success')
   else
     ShowMessage('Controller 2 centering failure');
@@ -285,12 +302,12 @@ end;
 
 procedure TMain.FeedbackBtnClick(Sender: TObject);
 begin
-  if SetControllerData(1, 12000) = 1 then
+  if SetControllerData(1, 100) = TOVR_SUCCESS then
     ShowMessage('Controller 1 Feedback success')
   else
     ShowMessage('Controller 1 Feedback failure');
 
-  if SetControllerData(2, 12000) = 1 then
+  if SetControllerData(2, 100) = TOVR_SUCCESS then
     ShowMessage('Controller 2 Feedback success')
   else
     ShowMessage('Controller 2 Feedback failure');
